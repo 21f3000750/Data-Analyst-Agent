@@ -1,0 +1,9 @@
+fastapi
+uvicorn
+python-multipart
+pandas
+matplotlib
+seaborn
+numpy
+duckdb
+google-generativeai
