@@ -67,9 +67,3 @@ async def run_agent_async(question: str, files: List[UploadFile]):
 @app.get("/")
 def read_root():
     return {"status": "Data Analyst Agent is running"}
-
-if __name__ == "__main__":
-    import uvicorn
-    uvicorn.run(app, host="0.0.0.0", port=8000)
-    # To run the server, use the command: uvicorn main:app --reload
-# To run the server, use the command: uvicorn main:app --reload
