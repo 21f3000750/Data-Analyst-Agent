@@ -7,3 +7,5 @@ seaborn
 numpy
 duckdb
 google-generativeai
+beautifulsoup4
+networkx
