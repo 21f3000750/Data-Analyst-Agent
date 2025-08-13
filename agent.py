@@ -56,7 +56,6 @@ class DataAnalystAgent:
         """
         file_context = self._prepare_file_context(uploaded_files)
 
-        # Build the initial user prompt for the conversational history
         user_prompt = f"""
         User's question:
         ---
@@ -67,26 +66,23 @@ class DataAnalystAgent:
         Please generate a Python script to answer the user's question.
         """
 
-        # The chat history for Gemini
         chat_session = self.model.start_chat(history=[])
 
-        # The self-healing loop
         for attempt in range(self.max_retries):
+            # FIX: Initialize generated_code to prevent UnboundLocalError if the API call itself fails.
+            generated_code = ""
             print(f"--- Agent Attempt #{attempt + 1} ---")
             prompt_to_send = user_prompt if attempt == 0 else self.last_debug_prompt
 
             try:
-                # Call the Gemini API to generate Python code
                 response = chat_session.send_message(prompt_to_send)
                 generated_code = response.text
 
-                # Extract the Python code from the markdown block if present
                 if "```python" in generated_code:
                     generated_code = generated_code.split("```python\n")[1].split("\n```")[0]
 
                 print("Generated Code:\n", generated_code)
 
-                # Execute the code and get the result
                 execution_scope = self._create_execution_scope(file_context)
                 exec(generated_code, execution_scope)
 
@@ -106,7 +102,6 @@ class DataAnalystAgent:
                     print("Max retries reached. Returning final error.")
                     return {"status": "error", "message": f"Agent failed after {self.max_retries} attempts. Last error: {error_traceback}"}
 
-                # Prepare the debug prompt for the next attempt
                 self.last_debug_prompt = f"""
                 The previous attempt failed.
 
@@ -185,6 +180,8 @@ class DataAnalystAgent:
         **Execution Environment:**
         - Libraries available: `pandas as pd`, `numpy as np`, `matplotlib.pyplot as plt`, `seaborn as sns`, `duckdb`, `requests`, `bs4.BeautifulSoup`, `io`, `base64`, and `re`.
         - Uploaded files are available as variables named after their sanitized filenames (e.g., a file 'my-data.csv' is available as a DataFrame named 'my_data_csv').
+
+        **Data Scraping Rules:**
 
         **Data Cleaning Rules:**
         - Before converting a column to a numeric type, you **MUST** clean it by removing non-numeric characters (e.g., $, ,, M, K, RK). Use `regex=True`.
