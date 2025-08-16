@@ -1,26 +1,20 @@
-# agent.py
-
 import os
 import traceback
 import io
 import base64
 from typing import List, Dict, Any
 
-# FIX: Set matplotlib backend to a non-GUI one to avoid environment errors.
-# This must be done BEFORE importing pyplot.
 import matplotlib
 matplotlib.use('Agg')
 
-# Gemini specific library
 import google.generativeai as genai
 
-# Tool Libraries
 import pandas as pd
 import numpy as np
 import matplotlib.pyplot as plt
 import seaborn as sns
 import duckdb
-import re # Import re for cleaning and sanitizing
+import re
 
 # Configure the Gemini client with the API key from environment variables
 genai.configure(api_key=os.environ["GEMINI_API_KEY"])
@@ -30,7 +24,6 @@ class DataAnalystAgent:
 
     def __init__(self, max_retries: int = 3):
         self.max_retries = max_retries
-        # Initialize the Gemini model with the master system prompt
         self.model = genai.GenerativeModel(
             model_name="gemini-2.5-pro",
             system_instruction=self._get_system_prompt()
@@ -69,7 +62,6 @@ class DataAnalystAgent:
         chat_session = self.model.start_chat(history=[])
 
         for attempt in range(self.max_retries):
-            # FIX: Initialize generated_code to prevent UnboundLocalError if the API call itself fails.
             generated_code = ""
             print(f"--- Agent Attempt #{attempt + 1} ---")
             prompt_to_send = user_prompt if attempt == 0 else self.last_debug_prompt
@@ -191,7 +183,7 @@ class DataAnalystAgent:
         - The `result` variable **MUST** be a Python list containing only raw data values (integers, floats, strings), not descriptive sentences.
 
         **Plotting Rules:**
-        - Generate plots using matplotlib, save to an in-memory buffer, encode as a base64 string, and format as a data URI (`data:image/png;base64,...`) under 100,000 bytes.
+        - Generate plots using matplotlib, save to an in-memory buffer, encode as a base64 string, and format as a data URI **MUST**  without the metadata (`data:image/png;base64,`) under 100,000 bytes.
 
         **Debugging Rules:**
         - If your code fails, analyze the error and provide a fully corrected script.
