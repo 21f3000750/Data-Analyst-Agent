@@ -3,6 +3,7 @@ from typing import List, Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException,Request
 from fastapi.responses import JSONResponse
 from starlette.middleware.cors import CORSMiddleware
+import ssl
 
 from agent import DataAnalystAgent
 
@@ -12,6 +13,13 @@ app = FastAPI(
     title="Data Analyst Agent API",
     description="An API that uses an LLM agent to analyze data.",
 )
+
+def create_ssl_context():
+    """Create SSL context that's more permissive for problematic certificates"""
+    ssl_context = ssl.create_default_context()
+    ssl_context.check_hostname = False
+    ssl_context.verify_mode = ssl.CERT_OPTIONAL
+    return ssl_context
 
 app.add_middleware(
     CORSMiddleware,
