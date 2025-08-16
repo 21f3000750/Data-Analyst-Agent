@@ -2,6 +2,7 @@ import asyncio
 from typing import List, Optional
 from fastapi import FastAPI, File, UploadFile, HTTPException,Request
 from fastapi.responses import JSONResponse
+from starlette.middleware.cors import CORSMiddleware
 
 from agent import DataAnalystAgent
 
@@ -10,6 +11,14 @@ REQUEST_TIMEOUT = 175
 app = FastAPI(
     title="Data Analyst Agent API",
     description="An API that uses an LLM agent to analyze data.",
+)
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 agent = DataAnalystAgent()
@@ -33,7 +42,7 @@ async def analyze_data(request: Request
         print(f"1Processing file field '{key}' with filename '{value.filename}'")
         print(type(value))
         print(isinstance(value, UploadFile))
-        if key == "questions.txt":
+        if key == "question.txt" or key == "questions.txt":
                 print(f"Found questions file in field '{key}' with filename '{value.filename}'")
                 questions_txt = value
         else:
